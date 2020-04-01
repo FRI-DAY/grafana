@@ -15,11 +15,22 @@ export function getPluginSettings(pluginId: string): Promise<PluginMeta> {
   return getBackendSrv()
     .get(`/api/plugins/${pluginId}/settings`)
     .then((settings: any) => {
+      if ('module' in settings) {
+        if (!settings.module.endsWith('.js')) {
+          settings.module += '.js';
+        }
+
+        if (!settings.module.startsWith('/')) {
+          settings.module = `/public/${settings.module}`;
+        }
+      }
+
       pluginInfoCache[pluginId] = settings;
       return settings;
     })
     .catch((err: any) => {
       // err.isHandled = true;
+      // @todo should reject an `Error`
       return Promise.reject('Unknown Plugin');
     });
 }

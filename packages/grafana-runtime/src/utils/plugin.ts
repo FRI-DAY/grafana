@@ -1,16 +1,17 @@
+/// <reference types="systemjs" />
 import { config } from '../config';
-
-// @ts-ignore
-import System from 'systemjs/dist/system.js';
+import 'systemjs/dist/system';
+import 'systemjs/dist/extras/amd';
 
 export interface PluginCssOptions {
   light: string;
   dark: string;
 }
 
-export const SystemJS = System;
+// @ts-ignore
+export const SystemJS = self.System as System;
 
 export function loadPluginCss(options: PluginCssOptions): Promise<any> {
   const theme = config.bootData.user.lightTheme ? options.light : options.dark;
-  return SystemJS.import(`${theme}!css`);
+  return SystemJS.import(theme);
 }

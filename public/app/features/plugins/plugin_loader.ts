@@ -45,6 +45,8 @@ import * as grafanaData from '@grafana/data';
 import * as grafanaUIraw from '@grafana/ui';
 import * as grafanaRuntime from '@grafana/runtime';
 
+const { SystemJS } = grafanaRuntime;
+
 // Help the 6.4 to 6.5 migration
 // The base classes were moved from @grafana/ui to @grafana/data
 // This exposes the same classes on both import paths
@@ -58,39 +60,10 @@ grafanaUI.DataSourceApi = grafanaData.DataSourceApi;
 import * as rxjs from 'rxjs';
 import * as rxjsOperators from 'rxjs/operators';
 
-// add cache busting
-const bust = `?_cache=${Date.now()}`;
-function locate(load: { address: string }) {
-  return load.address + bust;
-}
-grafanaRuntime.SystemJS.registry.set('plugin-loader', grafanaRuntime.SystemJS.newModule({ locate: locate }));
-
-grafanaRuntime.SystemJS.config({
-  baseURL: 'public',
-  defaultExtension: 'js',
-  packages: {
-    plugins: {
-      defaultExtension: 'js',
-    },
-  },
-  map: {
-    text: 'vendor/plugin-text/text.js',
-    css: 'vendor/plugin-css/css.js',
-  },
-  meta: {
-    '/*': {
-      esModule: true,
-      authorization: true,
-      loader: 'plugin-loader',
-    },
-  },
-});
-
-function exposeToPlugin(name: string, component: any) {
-  grafanaRuntime.SystemJS.registerDynamic(name, [], true, (require: any, exports: any, module: { exports: any }) => {
-    module.exports = component;
-  });
-}
+const exposeToPlugin = (name: string, component: any) => {
+  // `resolve` is needed because: https://github.com/systemjs/systemjs/issues/2152
+  SystemJS.set(SystemJS.resolve(name), component);
+};
 
 exposeToPlugin('@grafana/data', grafanaData);
 exposeToPlugin('@grafana/ui', grafanaUI);
@@ -190,7 +163,7 @@ export async function importPluginModule(path: string): Promise<any> {
       return Promise.resolve(builtIn);
     }
   }
-  return grafanaRuntime.SystemJS.import(path);
+  return SystemJS.import(path);
 }
 
 export function importDataSourcePlugin(meta: DataSourcePluginMeta): Promise<GenericDataSourcePlugin> {

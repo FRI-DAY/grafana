@@ -3,3 +3,4 @@ export * from './input';
 export * from './completion';
 export * from './storybook';
 export * from './icon';
+export * from './forms';

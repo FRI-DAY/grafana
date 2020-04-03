@@ -18,6 +18,7 @@ import { DashboardModel } from '../../state';
 import { CoreEvents, StoreState } from 'app/types';
 import { ShareModal } from 'app/features/dashboard/components/ShareModal';
 import { SaveDashboardModalProxy } from 'app/features/dashboard/components/SaveDashboard/SaveDashboardModalProxy';
+import { sanitizeUrl } from 'app/core/utils/text';
 
 export interface OwnProps {
   dashboard: DashboardModel;
@@ -139,6 +140,7 @@ class DashNav extends PureComponent<Props> {
     const { canStar, canSave, canShare, showSettings, isStarred } = dashboard.meta;
     const { snapshot } = dashboard;
     const snapshotUrl = snapshot && snapshot.originalUrl;
+
     return (
       <div className="navbar">
         {isFullscreen && this.renderBackButton()}
@@ -221,7 +223,7 @@ class DashNav extends PureComponent<Props> {
               tooltip="Open original dashboard"
               classSuffix="snapshot-origin"
               icon="link"
-              href={snapshotUrl}
+              href={sanitizeUrl(snapshotUrl)}
             />
           )}
 
